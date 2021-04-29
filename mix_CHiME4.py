@@ -61,6 +61,8 @@ def mix(idx):
         sampled_noise = noise[:,interval_noise:interval_noise+len_clean]
         clean2,noise2 = setSNR(clean,sampled_noise,SNR)
         noisy = clean2+noise2
+
+        # normalization
         normalization_ratio = np.max(np.abs(noisy))
         noisy = noisy/normalization_ratio
         clean2= clean2/normalization_ratio

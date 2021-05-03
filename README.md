@@ -19,5 +19,6 @@ tr05_org : 7138
 3. merge_CHiME4.py : isolated clean bth data -> 6ch clean data  
 4. mix_CHiME4.py   : mixing, clean+noise with SNRs  
 5. preprocess.m    : preprocess,  noisy data  > estimated speech, estimated noise, clean , 1ch each  
-6. TODO :  wav -> pytorch data in STFT domain  
+6. clean_1ch.py    : extract and sync merged WAV to 1ch clean data  
+7. TODO :  wav -> pytorch data in STFT domain  
   

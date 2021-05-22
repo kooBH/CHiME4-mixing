@@ -21,4 +21,10 @@ tr05_org : 7138
 5. preprocess.m    : preprocess,  noisy data  > estimated speech, estimated noise, clean , 1ch each  
 6. clean_1ch.py    : extract and sync merged WAV to 1ch clean data    
 7. to_pt.py        :  wav -> pytorch data in STFT domain    
-8. (optional) classification.py : mv data orignated from dt,et to another directory
+
+## Extra : 
+classification.py : mv .pt data orignated from dt,et to another directory   
+
+
+## Extra : MFCC
+1. mfcc.py

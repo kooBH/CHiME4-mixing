@@ -13,7 +13,7 @@ tr05_org : 7138
 ## SNR  
 -7, -5, 0, 5, 7, 10
 
-## Process  
+## Process for train data
 1. merge_org.sh : tr05_org simulated data -> 6ch clean data    
 2. merge_noise.sh  : isolated noise data -> 6ch noise data  
 3. merge_CHiME4.py : isolated clean bth data -> 6ch clean data  
@@ -24,6 +24,10 @@ tr05_org : 7138
 
 ## Extra : 
 classification.py : mv .pt data orignated from dt,et to another directory   
+
+## Process for test data
++ inference_mfcc.py
++ inference_mel.py
 
 
 ## Extra : MFCC

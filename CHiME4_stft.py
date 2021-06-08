@@ -17,15 +17,11 @@ warnings.filterwarnings('ignore')
 
 # param
 parser = argparse.ArgumentParser()
-parser.add_argument('--n_mels', '-m', type=int, required=True)
 parser.add_argument('--fft_size', '-n', type=int, required=False, default=1024)
 parser.add_argument('--output_root', '-o', type=str, required=True)
 args = parser.parse_args()
 
 fft_size = args.fft_size
-n_mels = args.n_mels
-
-mel_basis = librosa.filters.mel(sr=16000, n_fft=fft_size, n_mels=n_mels)
 
 ## ROOT
 noisy_root = '/home/data/kbh/CHiME4/isolated_1ch_track/'
@@ -59,22 +55,14 @@ def process(idx):
     estim_spec = librosa.stft(estim,window='hann',n_fft=fft_size,center=False)
     noise_spec = noisy_spec * mask
 
-    noisy = librosa.istft(noisy_spec,win_length = fft_size ,center=False)
-    estim = librosa.istft(estim_spec,win_length = fft_size,center=False)
-    noise = librosa.istft(noise_spec,win_length = fft_size,center=False)
-
-    noisy_mel = np.matmul(mel_basis,np.abs(noisy_spec))
-    estim_mel = np.matmul(mel_basis,np.abs(estim_spec))
-    noise_mel = np.matmul(mel_basis,np.abs(noise_spec))
-
-    torch_estim = torch.from_numpy(estim)
-    torch_noisy = torch.from_numpy(noisy)
-    torch_noise = torch.from_numpy(noise)
+    torch_estim = torch.from_numpy(estim_spec)
+    torch_noisy = torch.from_numpy(noisy_spec)
+    torch_noise = torch.from_numpy(noise_spec)
 
     # save
-    torch.save(torch_estim,os.path.join(output_root,'mel-'+str(n_mels),'estim',target_category,target_id+'.pt'))
-    torch.save(torch_noisy,os.path.join(output_root,'mel-'+str(n_mels),'noisy',target_category,target_id+'.pt'))
-    torch.save(torch_noise,os.path.join(output_root,'mel-'+str(n_mels),'noise',target_category,target_id+'.pt'))
+    torch.save(torch_estim,os.path.join(output_root,'STFT-'+str(fft_size),'measure','estim',target_category,target_id+'.pt'))
+    torch.save(torch_noisy,os.path.join(output_root,'STFT-'+str(fft_size),'measure','noisy',target_category,target_id+'.pt'))
+    torch.save(torch_noise,os.path.join(output_root,'STFT-'+str(fft_size),'measure','noise',target_category,target_id+'.pt'))
 
 if __name__=='__main__': 
     cpu_num = cpu_count()
@@ -89,12 +77,12 @@ if __name__=='__main__':
                 dirs.append(i+'05_'+j+'_'+k)
         
     for i in dirs :
-        os.makedirs(os.path.join(output_root,'mel-'+str(n_mels),'estim',i),exist_ok=True)
-        os.makedirs(os.path.join(output_root,'mel-'+str(n_mels),'noisy',i),exist_ok=True)
-        os.makedirs(os.path.join(output_root,'mel-'+str(n_mels),'noise',i),exist_ok=True)
+        os.makedirs(os.path.join(output_root,'STFT-'+str(fft_size),'measure','estim',i),exist_ok=True)
+        os.makedirs(os.path.join(output_root,'STFT-'+str(fft_size),'measure','noisy',i),exist_ok=True)
+        os.makedirs(os.path.join(output_root,'STFT-'+str(fft_size),'measure','noise',i),exist_ok=True)
 
     arr = list(range(len(noisy_list)))
     with Pool(cpu_num) as p:
-        r = list(tqdm(p.imap(process, arr), total=len(arr),ascii=True,desc='CHiME4 mel-'+str(n_mels)))
+        r = list(tqdm(p.imap(process, arr), total=len(arr),ascii=True,desc='CHiME4 STFT-'+str(fft_size)))
 
 

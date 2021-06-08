@@ -134,3 +134,4 @@ preprocess
 # tmp
 log
 *.mat
+data/inv_noisy.wav

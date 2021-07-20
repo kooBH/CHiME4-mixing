@@ -5,8 +5,12 @@ import shutil
 
 ref_root = '/home/data/kbh/CHiME4/isolated/'
 
-work_root = '/home/data/kbh/MCSE/CGMM_RLS_MPDR/train/'
-test_root = '/home/data/kbh/MCSE/CGMM_RLS_MPDR/test/'
+#target = 'CGMM_RLS_MPDR'
+target = 'AuxIVA_DC_SVE'
+
+
+work_root = '/home/data/kbh/MCSE/'+target+'/train/'
+test_root = '/home/data/kbh/MCSE/'+target+'/test/'
 
 list_SNR = ['SNR-7','SNR-5','SNR0','SNR5','SNR7','SNR10']
 list_sub = ['noisy','estimated_speech','estimated_noise']
@@ -19,7 +23,6 @@ os.makedirs(os.path.join(test_root,'clean'), exist_ok = True)
 for i in list_SNR : 
     for j in list_sub : 
         os.makedirs(os.path.join(test_root,i,j),exist_ok = True)
-
 
 def dt(idx):
     ref_path = list_dt[idx]

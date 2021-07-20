@@ -17,11 +17,15 @@ import warnings
 warnings.filterwarnings('ignore')
 
 fft_size = 1024
+overlap_size = fft_size - int(fft_size/4)
 window = torch.hann_window(window_length=fft_size,periodic=True, dtype=None, 
                            layout=torch.strided, device=None, requires_grad=False)
 
-input_root =  '/home/data/kbh/CHiME4/CGMM_RLS_MPDR/'
-output_root = '/home/data/kbh/MCSE/CGMM_RLS_MPDR/'
+#target =  'CGMM_RLS_MPDR'
+target = 'AuxIVA_DC_SVE'
+
+input_root =  '/home/data/kbh/CHiME4/' + target + '/'
+output_root = '/home/data/kbh/MCSE/' + target + '/'
 
 list_SNR = ['SNR10','SNR7','SNR5','SNR0','SNR-5','SNR-7']
 list_type = ['noisy','estimated_speech','estimated_noise']
@@ -33,10 +37,14 @@ def to_pt(idx):
     file_name = file_path.split('/')[-1]
     file_name = file_name.split('.')[0]
 
-    clean_path  = input_root + 'clean_1ch' + '/' + file_name + '.wav'
+    clean_path  = input_root + '../clean_1ch' + '/' + file_name + '.wav'
     clean_out_path =  output_root + 'clean' + '/' + file_name + '.pt'
 
     clean,_ = librosa.load(clean_path,sr=16000)
+    
+    if target == 'AuxIVA_DC_SVE':
+        clean = clean[overlap_size:]
+    
     spec_clean = librosa.stft(clean,window='hann', n_fft=fft_size,hop_length=None, win_length=None,center=False)
     spec_clean = np.concatenate((np.expand_dims(spec_clean.real,-1),np.expand_dims(spec_clean.imag,-1)),2)
     torch_clean = torch.from_numpy(spec_clean)
@@ -55,8 +63,12 @@ def to_pt(idx):
         speech,_ = librosa.load(speech_path,sr=16000)
         noise,_ = librosa.load(noise_path,sr=16000)
         
-        # noisy is 768 samples longer
-        noisy = noisy[:-768]
+        if target == 'CGMM_RLS_MPDR':
+            noisy = noisy[:-overlap_size]
+        if target == 'AuxIVA_DC_SVE':
+            noisy = noisy[:-overlap_size]
+            speech = speech[:-overlap_size]
+            noise = noise[:-overlap_size]
 
         spec_noisy = librosa.stft(noisy,window='hann', n_fft=fft_size,hop_length=None, win_length=None,center=False)
         spec_speech = librosa.stft(speech,window='hann', n_fft=fft_size,hop_length=None, win_length=None,center=False)
@@ -84,9 +96,11 @@ if __name__=='__main__':
         for j in list_type : 
             os.makedirs(os.path.join(output_root,i,j),exist_ok=True)
     
+    print(len(list_input))
+
     cpu_num = cpu_count()
     # save 8 threads for others
-    cpu_num = 32
+    cpu_num = 64
 
 #    to_pt(0)
     arr = list(range(len(list_input)))

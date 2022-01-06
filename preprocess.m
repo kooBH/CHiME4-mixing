@@ -1,14 +1,17 @@
 addpath('preprocess')
 
-parpool('local',32)
+parpool('local',22)
 
 %processor = 'CGMM_RLS_MPDR'
-processor = 'AuxIVA_DC_SVE';
+%processor = 'AuxIVA_DC_SVE';
+processor = 'WPE_MLDR_OMLSA';
 
 %% path
 root = "/home/data/kbh/CHiME4/merged_WAV/";
 root_output = ['/home/data/kbh/CHiME4/' processor '/'];
-SNR_dirs=["SNR-7","SNR-5","SNR0","SNR5","SNR7","SNR10"];
+%root_output = ['/home/data/kbh/CHiME4/' processor '_norm_2/'];
+SNR_dirs=["SNR-7","SNR-5","SNR0","SNR5","SNR7"];
+%SNR_dirs=["SNR10"];
 
 %% params
 winL = 1024;
@@ -35,15 +38,17 @@ for SNR_idx=1:length(SNR_dirs)
     mkdir(strcat(root_output,SNR_dirs(SNR_idx),"/","noisy"));
     mkdir(strcat(root_output,SNR_dirs(SNR_idx),"/","estimated_speech"));
     mkdir(strcat(root_output,SNR_dirs(SNR_idx),"/","estimated_noise"));
+    mkdir(strcat(root_output,SNR_dirs(SNR_idx),"/","clean"));
 
     parfor (target_idx = 1:length(target_list),32)
+    %for target_idx = 1:length(target_list)
         target = target_list(target_idx);
         input_path = [target.folder  '/'  target.name];
         output_path = strcat(root_output,"/",SNR_dirs(SNR_idx),"/");
 
         x = audioread(input_path);
 
-        if processor == 'CGMM_RPS_MPDR'
+        if strcmp(processor,'CGMM_RLS_MPDR')
             [estimated_speech,estimated_noise] = CGMM_RLS_tuning(x,winL,gamma,Ln,MVDR_on);
 
             % sync
@@ -62,19 +67,27 @@ for SNR_idx=1:length(SNR_dirs)
             end
             noisy= sync(1:length(estimated_speech),1);
 
-        elseif processor == 'AuxIVA_DC_SVE' 
+        elseif strcmp(processor,'AuxIVA_DC_SVE') 
             [estimated_speech,estimated_noise] = run_AuxIVA_DC_SVE(x,winL,pdf_opt,mdp_opt,online_opt);
             noisy = x;
+        elseif strcmp(processor,'WPE_MLDR_OMLSA')
+            [estimated_speech,estimated_noise] = WPE_MLDR_OMLSA(x);
+            noisy = x
     
         end
-        % normalize
-        estimated_noise= estimated_noise/max(abs(estimated_noise));
-        estimated_speech = estimated_speech/max(abs(estimated_speech));
+        %% normalize
+        %estimated_noise= estimated_noise/max(abs(estimated_noise));
+        %estimated_speech = estimated_speech/max(abs(estimated_speech));
+
+        %% normalization based on input scale : norm_2
+        estimated_speech = estimated_speech/max(abs(noisy(:,1)));
+        estimated_noise = estimated_noise/max(abs(noisy(:,1)));
+
 
         % save
         audiowrite(strcat(output_path,'noisy','/',target.name),noisy(:,1),fs);
-        audiowrite(strcat(output_path,'estimated_speech','/',target.name),estimated_speech,fs);
-        audiowrite(strcat(output_path,'estimated_noise','/',target.name),estimated_noise,fs);
+        audiowrite(strcat(output_path,'estimated_speech','/',target.name),estimated_speech(:,1),fs);
+        audiowrite(strcat(output_path,'estimated_noise','/',target.name),estimated_noise(:,1),fs);
             
         %disp(['progress ' num2str(SNR_idx) '/'  num2str(length(SNR_dirs)) ' | ' num2str(target_idx) '/' num2str(length(target_list))])
     end

@@ -61,7 +61,10 @@ def convert(path,category):
         clean, sr = librosa.load(os.path.join(clean_root,snr,'clean',target_id+'.wav'),sr=sr)
         noisy, sr = librosa.load(os.path.join(input_root,category,snr,'noisy',target_id+'.wav'),sr=sr)
         # adjust mistake in mixing
-        noisy = noisy[:-768]
+
+        if target =='CGMM_RLS_MPDR':
+            noisy = noisy[:-768]
+
         estim, sr = librosa.load(os.path.join(input_root,category,snr,'estimated_speech',target_id+'.wav'),sr=sr)
         noise, sr = librosa.load(os.path.join(input_root,category,snr,'estimated_noise',target_id+'.wav'),sr=sr)
 

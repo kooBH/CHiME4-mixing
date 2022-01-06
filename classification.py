@@ -6,14 +6,16 @@ import shutil
 ref_root = '/home/data/kbh/CHiME4/isolated/'
 
 #target = 'CGMM_RLS_MPDR'
-target = 'AuxIVA_DC_SVE'
+#target = 'AuxIVA_DC_SVE'
+target = 'CGMM_RLS_MPDR_norm_2/'
 
 
 work_root = '/home/data/kbh/MCSE/'+target+'/train/'
 test_root = '/home/data/kbh/MCSE/'+target+'/test/'
 
-list_SNR = ['SNR-7','SNR-5','SNR0','SNR5','SNR7','SNR10']
-list_sub = ['noisy','estimated_speech','estimated_noise']
+#list_SNR = ['SNR-7','SNR-5','SNR0','SNR5','SNR7','SNR10']
+list_SNR = ['SNR-7','SNR-5','SNR0','SNR5','SNR7']
+list_sub = ['noisy','estimated_speech','estimated_noise','clean']
 
 list_dt = [x for x in glob.glob(os.path.join(ref_root,'dt05_bth','*.CH1.wav'))]
 list_et = [x for x in glob.glob(os.path.join(ref_root,'et05_bth','*.CH1.wav'))]
@@ -29,7 +31,6 @@ def dt(idx):
     name = ref_path.split('/')[-1]
     name = name.split('.')[0]
     name = name + '.pt'
-    shutil.move(os.path.join(work_root,'clean',name),os.path.join(test_root,'clean',name))
     for i in list_SNR : 
         for j in list_sub : 
             shutil.move(os.path.join(work_root,i,j,name),os.path.join(test_root,i,j,name))
@@ -39,7 +40,6 @@ def et(idx):
     name = ref_path.split('/')[-1]
     name = name.split('.')[0]
     name = name + '.pt'
-    shutil.move(os.path.join(work_root,'clean',name),os.path.join(test_root,'clean',name))
     for i in list_SNR : 
         for j in list_sub : 
             shutil.move(os.path.join(work_root,i,j,name),os.path.join(test_root,i,j,name))
